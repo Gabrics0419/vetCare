@@ -1,2 +1,2 @@
 # vetCare
-Primer proyecto de Diseño de Software
+Proyecto de Diseño de Software
