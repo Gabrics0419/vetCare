@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetCare - Sistema Veterinario</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e7a, #1a2a5c);
+            padding: 20px;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-box h1 {
+            text-align: center;
+            color: #1a2a5c;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .auth-box .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .auth-box label {
+            display: block;
+            font-weight: 600;
+            margin: 12px 0 4px;
+            color: #333;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .auth-box input:focus {
+            outline: none;
+            border-color: #2c3e7a;
+            box-shadow: 0 0 0 3px rgba(44, 62, 122, 0.15);
+        }
+
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background: #2c3e7a;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 18px;
+            transition: 0.3s;
+        }
+
+        .auth-box button:hover {
+            background: #1a2a5c;
+            transform: translateY(-1px);
+        }
+
+        .auth-box .link {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+
+        .auth-box .link a {
+            color: #2c3e7a;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-box .link a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-box .message {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .auth-box .message.error {
+            display: block;
+            background: #fee;
+            color: #c00;
+            border: 1px solid #fcc;
+        }
+
+        .auth-box .message.success {
+            display: block;
+            background: #efe;
+            color: #080;
+            border: 1px solid #cfc;
+        }
+
+        /* ==========================================
+               DASHBOARD (logueado)
+               ========================================== */
+        .app-container {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .app-header {
+            background: #1a2a5c;
+            color: white;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .app-header .logo {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .app-header .logo span {
+            color: #7aacff;
+        }
+
+        .app-header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+        }
+
+        .app-header .user-info .role-badge {
+            background: #2c3e7a;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .app-header .btn-logout {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .app-header .btn-logout:hover {
+            background: #a93226;
+        }
+
+        /* Layout principal: sidebar + contenido */
+        .app-main {
+            display: flex;
+            flex: 1;
+        }
+
+        /* Sidebar */
+        .app-sidebar {
+            width: 220px;
+            background: #2c3e7a;
+            padding: 20px 0;
+            min-height: calc(100vh - 70px);
+            flex-shrink: 0;
+        }
+
+        .app-sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .app-sidebar .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+        }
+
+        .app-sidebar .menu-item.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border-left-color: #7aacff;
+        }
+
+        .app-sidebar .menu-item .icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .app-sidebar .menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 12px 20px;
+        }
+
+        /* Contenido */
+        .app-content {
+            flex: 1;
+            padding: 24px 30px;
+            background: #f4f7fc;
+            overflow-x: auto;
+        }
+
+        .app-content .page-title {
+            font-size: 24px;
+            color: #1a2a5c;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 12px;
+        }
+
+        /* Tablas */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            overflow-x: auto;
+            padding: 16px;
+        }
+
+        .table-container .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .table-container .toolbar .btn-primary {
+            background: #2c3e7a;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .table-container .toolbar .btn-primary:hover {
+            background: #1a2a5c;
+        }
+
+        .table-container .toolbar .btn-small {
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        table thead {
+            background: #f8f9fc;
+        }
+
+        table th {
+            text-align: left;
+            padding: 12px 12px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+        table tr:hover {
+            background: #f8f9fc;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.2s;
+            margin-right: 4px;
+        }
+
+        .btn-action.edit {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-action.edit:hover {
+            background: #d68910;
+        }
+
+        .btn-action.delete {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-action.delete:hover {
+            background: #c0392b;
+        }
+
+        .btn-action.view {
+            background: #3498db;
+            color: white;
+        }
+        .btn-action.view:hover {
+            background: #2980b9;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+            font-style: italic;
+        }
+
+        /* ==========================================
+               MODALES
+               ========================================== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 550px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-box h2 {
+            color: #1a2a5c;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .modal-box label {
+            display: block;
+            font-weight: 600;
+            margin: 12px 0 4px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .modal-box input,
+        .modal-box select,
+        .modal-box textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .modal-box input:focus,
+        .modal-box select:focus,
+        .modal-box textarea:focus {
+            outline: none;
+            border-color: #2c3e7a;
+        }
+
+        .modal-box textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .modal-box .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 8px 0 12px;
+        }
+
+        .modal-box .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: normal;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .modal-box .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .modal-actions button {
+            padding: 8px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .modal-actions .btn-save {
+            background: #2c3e7a;
+            color: white;
+        }
+        .modal-actions .btn-save:hover {
+            background: #1a2a5c;
+        }
+
+        .modal-actions .btn-cancel {
+            background: #e9ecef;
+            color: #333;
+        }
+        .modal-actions .btn-cancel:hover {
+            background: #dde1e6;
+        }
+
+        .inline-add-btn {
+            background: #2c3e7a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .inline-add-btn:hover {
+            background: #1a2a5c;
+        }
+
+        .select-with-add {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .select-with-add select {
+            flex: 1;
+        }
+
+        /* ==========================================
+               RESPONSIVE
+               ========================================== */
+        @media (max-width: 768px) {
+            .app-main {
+                flex-direction: column;
+            }
+
+            .app-sidebar {
+                width: 100%;
+                min-height: auto;
+                display: flex;
+                flex-wrap: wrap;
+                padding: 8px 12px;
+                gap: 4px;
+            }
+
+            .app-sidebar .menu-item {
+                padding: 8px 14px;
+                font-size: 13px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+
+            .app-sidebar .menu-item.active {
+                border-bottom-color: #7aacff;
+                border-left-color: transparent;
+            }
+
+            .app-sidebar .menu-divider {
+                display: none;
+            }
+
+            .app-content {
+                padding: 16px;
+            }
+
+            .auth-box {
+                padding: 24px;
+            }
+
+            .app-header {
+                padding: 12px 16px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .app-header .user-info {
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+
+            .modal-box {
+                padding: 20px;
+                max-width: 95%;
+            }
+
+            table {
+                font-size: 12px;
+            }
+            table th,
+            table td {
+                padding: 6px 8px;
+            }
+        }
+
+        /* ==========================================
+               TOAST / NOTIFICACIONES
+               ========================================== */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform 0.4s ease;
+            max-width: 380px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+        .toast.error {
+            background: #e74c3c;
+        }
+        .toast.info {
+            background: #2c3e7a;
+        }
+
+        /* Badge de roles en tabla */
+        .role-badge-sm {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px;
+            color: #333;
+        }
+        .role-badge-sm.admin {
+            background: #c0392b;
+            color: white;
+        }
+        .role-badge-sm.veterinario {
+            background: #2c3e7a;
+            color: white;
+        }
+        .role-badge-sm.recepcionista {
+            background: #27ae60;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==========================================
+TOAST (notificaciones)
+========================================== -->
+<div id="toast" class="toast"></div>
+
+<!-- ==========================================
+PANTALLA DE LOGIN / REGISTER
+========================================== -->
+<div id="authContainer" class="auth-container">
+    <div class="auth-box">
+        <h1>🐾 VetCare</h1>
+        <p class="subtitle">Sistema de Gestión Veterinaria</p>
+
+        <!-- Login -->
+        <div id="loginForm">
+            <label>Usuario</label>
+            <input type="text" id="loginUser" placeholder="admin" value="admin">
+
+            <label>Contraseña</label>
+            <input type="password" id="loginPass" placeholder="••••••••" value="admin123">
+
+            <button onclick="doLogin()">Iniciar Sesión</button>
+
+            <div class="link">
+                ¿No tienes cuenta? <a onclick="showRegister()">Regístrate aquí</a>
+            </div>
+            <div id="authMessage" class="message"></div>
+        </div>
+
+        <!-- Registro -->
+        <div id="registerForm" style="display:none;">
+            <label>Usuario</label>
+            <input type="text" id="regUser" placeholder="ej. juan">
+
+            <label>Email</label>
+            <input type="email" id="regEmail" placeholder="ej. juan@vet.com">
+
+            <label>Contraseña</label>
+            <input type="password" id="regPass" placeholder="mínimo 6 caracteres">
+
+            <button onclick="doRegister()">Registrarse</button>
+
+            <div class="link">
+                ¿Ya tienes cuenta? <a onclick="showLogin()">Inicia sesión</a>
+            </div>
+            <div id="regMessage" class="message"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+DASHBOARD (logueado)
+========================================== -->
+<div id="appContainer" class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo">🐾 <span>Vet</span>Care</div>
+        <div class="user-info">
+            <span id="userName">Usuario</span>
+            <span class="role-badge" id="userRole">ROL</span>
+            <button class="btn-logout" onclick="doLogout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <div class="app-main">
+
+        <!-- Sidebar -->
+        <nav class="app-sidebar" id="sidebar">
+            <!-- Los ítems se generan dinámicamente con JS -->
+        </nav>
+
+        <!-- Contenido -->
+        <main class="app-content" id="appContent">
+            <h2 class="page-title" id="pageTitle">Bienvenido</h2>
+            <div id="pageContent">
+                <p>Selecciona una opción del menú.</p>
+            </div>
+        </main>
+
+    </div>
+</div>
+
+<!-- ==========================================
+MODAL (formulario genérico)
+========================================== -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <h2 id="modalTitle">Nuevo registro</h2>
+        <form id="modalForm" autocomplete="off">
+            <!-- Los campos se generan dinámicamente -->
+            <div id="modalFields"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn-save" id="modalSaveBtn">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+MODAL ESPECIAL PARA ROLES
+========================================== -->
+<div class="modal-overlay" id="rolesModalOverlay">
+    <div class="modal-box">
+        <h2 id="rolesModalTitle">Editar Roles de Usuario</h2>
+        <form id="rolesModalForm">
+            <label>Usuario: <span id="rolesModalUsername" style="font-weight:bold;"></span></label>
+            <div class="checkbox-group" id="rolesCheckboxes">
+                <label><input type="checkbox" value="ADMIN"> ADMIN</label>
+                <label><input type="checkbox" value="VETERINARIO"> VETERINARIO</label>
+                <label><input type="checkbox" value="RECEPCIONISTA"> RECEPCIONISTA</label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeRolesModal()">Cancelar</button>
+                <button type="submit" class="btn-save">Guardar Roles</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ==========================================
+JAVASCRIPT
+========================================== -->
+<script>
+    // ==========================================
+    // CONFIGURACIÓN
+    // ==========================================
+    const API_BASE = '/api';
+
+    // ==========================================
+    // ESTADO GLOBAL
+    // ==========================================
+    let currentUser = null; // { username, email, roles: [] }
+    let currentToken = null;
+    let currentView = 'clientes';
+
+    // ==========================================
+    // UTILIDADES
+    // ==========================================
+    function showToast(message, type = 'info') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = 'toast ' + type + ' show';
+        clearTimeout(toast._hide);
+        toast._hide = setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    function getAuthHeader() {
+        return { 'Authorization': 'Bearer ' + currentToken };
+    }
+
+    function apiFetch(endpoint, options = {}) {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(currentToken ? getAuthHeader() : {}),
+            ...(options.headers || {})
+        };
+        return fetch(API_BASE + endpoint, {
+            ...options,
+            headers
+        }).then(async res => {
+            if (!res.ok) {
+                let msg = res.status + ' ' + res.statusText;
+                try {
+                    const err = await res.json();
+                    if (err.message) msg = err.message;
+                    else if (err.error) msg = err.error;
+                } catch (e) { /* ignore */ }
+                throw new Error(msg);
+            }
+            if (res.status === 204) return null;
+            return res.json();
+        });
+    }
+
+    // Decodifica el token JWT y extrae los roles
+    function decodeTokenRoles(token) {
+        try {
+            const payload = token.split('.')[1];
+            const decoded = JSON.parse(atob(payload));
+            let roles = [];
+            if (decoded.roles) {
+                if (Array.isArray(decoded.roles)) {
+                    roles = decoded.roles.map(r => r.authority ? r.authority.replace('ROLE_', '') : r);
+                } else if (typeof decoded.roles === 'string') {
+                    roles = [decoded.roles];
+                }
+            } else if (decoded.authorities) {
+                roles = decoded.authorities.map(a => a.replace('ROLE_', ''));
+            }
+            return roles;
+        } catch (e) {
+            return ['RECEPCIONISTA'];
+        }
+    }
+
+    // ==========================================
+    // AUTENTICACIÓN
+    // ==========================================
+    function showRegister() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+        document.getElementById('authMessage').className = 'message';
+        document.getElementById('authMessage').textContent = '';
+    }
+
+    function showLogin() {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('regMessage').className = 'message';
+        document.getElementById('regMessage').textContent = '';
+    }
+
+    function doLogin() {
+        const username = document.getElementById('loginUser').value.trim();
+        const password = document.getElementById('loginPass').value.trim();
+        const msg = document.getElementById('authMessage');
+
+        if (!username || !password) {
+            msg.className = 'message error';
+            msg.textContent = '❌ Completa todos los campos.';
+            return;
+        }
+
+        apiFetch('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        }).then(data => {
+            currentToken = data.token;
+            const roles = decodeTokenRoles(currentToken);
+            currentUser = {
+                username: data.username,
+                email: data.email,
+                roles: roles
+            };
+            localStorage.setItem('vetcare_token', currentToken);
+            localStorage.setItem('vetcare_user', JSON.stringify(currentUser));
+            enterApp();
+        }).catch(err => {
+            msg.className = 'message error';
+            msg.textContent = '❌ ' + err.message;
+        });
+    }
+
+    function doRegister() {
+        const username = document.getElementById('regUser').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPass').value.trim();
+        const msg = document.getElementById('regMessage');
+
+        if (!username || !email || !password || password.length < 6) {
+            msg.className = 'message error';
+            msg.textContent = '❌ Completa todos los campos (mínimo 6 caracteres).';
+            return;
+        }
+
+        apiFetch('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({ username, email, password })
+        }).then(data => {
+            msg.className = 'message success';
+            msg.textContent = '✅ ' + data.message;
+            document.getElementById('loginUser').value = username;
+            document.getElementById('loginPass').value = password;
+            showLogin();
+            doLogin();
+        }).catch(err => {
+            msg.className = 'message error';
+            msg.textContent = '❌ ' + err.message;
+        });
+    }
+
+    // ==========================================
+    // ENTRAR A LA APLICACIÓN
+    // ==========================================
+    function enterApp() {
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+
+        document.getElementById('userName').textContent = currentUser.username;
+        const roleStr = currentUser.roles.join(', ');
+        document.getElementById('userRole').textContent = roleStr;
+
+        buildMenu();
+        navigateTo('clientes');
+    }
+
+    // ==========================================
+    // MENÚ DINÁMICO
+    // ==========================================
+    function buildMenu() {
+        const sidebar = document.getElementById('sidebar');
+        const roles = currentUser.roles || [];
+        const isAdmin = roles.includes('ADMIN');
+        const isVet = roles.includes('VETERINARIO');
+        const isRecep = roles.includes('RECEPCIONISTA');
+
+        const items = [
+            { id: 'clientes', label: 'Clientes', icon: '👤', visible: true },
+            { id: 'mascotas', label: 'Mascotas', icon: '🐕', visible: true },
+            { id: 'veterinarios', label: 'Veterinarios', icon: '👨‍⚕️', visible: isAdmin || isVet },
+            { id: 'especialidades', label: 'Especialidades', icon: '🏷️', visible: isAdmin }, // NUEVO
+            { id: 'citas', label: 'Citas', icon: '📅', visible: true },
+            { id: 'tratamientos', label: 'Tratamientos', icon: '💊', visible: isAdmin || isVet },
+            { id: 'medicamentos', label: 'Medicamentos', icon: '🧪', visible: isAdmin },
+            { id: 'facturas', label: 'Facturas', icon: '💰', visible: isAdmin || isRecep },
+            { id: 'usuarios', label: 'Usuarios', icon: '👥', visible: isAdmin }
+        ];
+
+        const visible = items.filter(item => item.visible);
+
+        let html = '';
+        visible.forEach(item => {
+            html += `<div class="menu-item" data-view="${item.id}" onclick="navigateTo('${item.id}')">
+                            <span class="icon">${item.icon}</span>
+                            ${item.label}
+                        </div>`;
+        });
+
+        sidebar.innerHTML = html;
+    }
+
+    // ==========================================
+    // NAVEGACIÓN
+    // ==========================================
+    function navigateTo(view) {
+        currentView = view;
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+        const active = document.querySelector(`.menu-item[data-view="${view}"]`);
+        if (active) active.classList.add('active');
+
+        const titleMap = {
+            clientes: '👤 Clientes',
+            mascotas: '🐕 Mascotas',
+            veterinarios: '👨‍⚕️ Veterinarios',
+            especialidades: '🏷️ Especialidades',
+            citas: '📅 Citas',
+            tratamientos: '💊 Tratamientos',
+            medicamentos: '🧪 Medicamentos',
+            facturas: '💰 Facturas',
+            usuarios: '👥 Usuarios'
+        };
+        document.getElementById('pageTitle').textContent = titleMap[view] || view;
+
+        const renderFn = {
+            clientes: renderClientes,
+            mascotas: renderMascotas,
+            veterinarios: renderVeterinarios,
+            especialidades: renderEspecialidades,
+            citas: renderCitas,
+            tratamientos: renderTratamientos,
+            medicamentos: renderMedicamentos,
+            facturas: renderFacturas,
+            usuarios: renderUsuarios
+        } [view];
+
+        if (renderFn) renderFn();
+        else {
+            document.getElementById('pageContent').innerHTML = '<p>Vista en construcción.</p>';
+        }
+    }
+
+    // ==========================================
+    // FUNCIONES DE RENDERIZADO (CRUD)
+    // ==========================================
+
+    // ---------- CLIENTES ----------
+    function renderClientes() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de clientes</span>
+                            <button class="btn-primary" onclick="openModal('cliente', null)">+ Nuevo Cliente</button>
+                        </div>
+                        <div id="clientesTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshClientes();
+    }
+
+    function refreshClientes() {
+        apiFetch('/clientes').then(data => {
+            const container = document.getElementById('clientesTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay clientes registrados.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th><th>Teléfono</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(c => {
+                html += `<tr>
+                                <td>${c.id}</td>
+                                <td>${c.nombre}</td>
+                                <td>${c.apellido}</td>
+                                <td>${c.email}</td>
+                                <td>${c.telefono || '-'}</td>
+                                <td>
+                                    <button class="btn-action edit" onclick="openModal('cliente', ${c.id})">✏️</button>
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteCliente(${c.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar clientes: ' + err.message, 'error'));
+    }
+
+    function deleteCliente(id) {
+        if (!confirm('¿Eliminar este cliente?')) return;
+        apiFetch('/clientes/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Cliente eliminado', 'success');
+            refreshClientes();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- MASCOTAS ----------
+    function renderMascotas() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de mascotas</span>
+                            <button class="btn-primary" onclick="openModal('mascota', null)">+ Nueva Mascota</button>
+                        </div>
+                        <div id="mascotasTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshMascotas();
+    }
+
+    function refreshMascotas() {
+        apiFetch('/mascotas').then(data => {
+            const container = document.getElementById('mascotasTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay mascotas registradas.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Nombre</th><th>Especie</th><th>Raza</th><th>Dueño</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(m => {
+                html += `<tr>
+                                <td>${m.id}</td>
+                                <td>${m.nombre}</td>
+                                <td>${m.especie}</td>
+                                <td>${m.raza || '-'}</td>
+                                <td>${m.clienteNombreCompleto || 'ID: '+m.clienteId}</td>
+                                <td>
+                                    <button class="btn-action edit" onclick="openModal('mascota', ${m.id})">✏️</button>
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteMascota(${m.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar mascotas: ' + err.message, 'error'));
+    }
+
+    function deleteMascota(id) {
+        if (!confirm('¿Eliminar esta mascota?')) return;
+        apiFetch('/mascotas/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Mascota eliminada', 'success');
+            refreshMascotas();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- VETERINARIOS ----------
+    function renderVeterinarios() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de veterinarios</span>
+                            ${canManageVeterinarios() ? `<button class="btn-primary" onclick="openModal('veterinario', null)">+ Nuevo Veterinario</button>` : ''}
+                        </div>
+                        <div id="veterinariosTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshVeterinarios();
+    }
+
+    function refreshVeterinarios() {
+        apiFetch('/veterinarios').then(data => {
+            const container = document.getElementById('veterinariosTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay veterinarios registrados.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Nombre</th><th>Apellido</th><th>Email</th><th>Especialidad</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(v => {
+                html += `<tr>
+                                <td>${v.id}</td>
+                                <td>${v.nombre}</td>
+                                <td>${v.apellido}</td>
+                                <td>${v.email}</td>
+                                <td>${v.especialidadNombre || '-'}</td>
+                                <td>
+                                    ${canManageVeterinarios() ? `<button class="btn-action edit" onclick="openModal('veterinario', ${v.id})">✏️</button>` : ''}
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteVeterinario(${v.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar veterinarios: ' + err.message, 'error'));
+    }
+
+    function deleteVeterinario(id) {
+        if (!confirm('¿Eliminar este veterinario?')) return;
+        apiFetch('/veterinarios/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Veterinario eliminado', 'success');
+            refreshVeterinarios();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- ESPECIALIDADES (NUEVO) ----------
+    function renderEspecialidades() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                <div class="table-container">
+                    <div class="toolbar">
+                        <span>Listado de especialidades</span>
+                        <button class="btn-primary" onclick="openModal('especialidad', null)">+ Nueva Especialidad</button>
+                    </div>
+                    <div id="especialidadesTable"><p class="empty-message">Cargando...</p></div>
+                </div>
+            `;
+        refreshEspecialidades();
+    }
+
+    function refreshEspecialidades() {
+        apiFetch('/especialidades').then(data => {
+            const container = document.getElementById('especialidadesTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay especialidades registradas.</p>`;
+                return;
+            }
+            let html = `<table>
+                    <thead><tr>
+                        <th>ID</th><th>Nombre</th><th>Descripción</th><th>Acciones</th>
+                    </tr></thead><tbody>`;
+            data.forEach(e => {
+                html += `<tr>
+                        <td>${e.id}</td>
+                        <td>${e.nombre}</td>
+                        <td>${e.descripcion || '-'}</td>
+                        <td>
+                            <button class="btn-action edit" onclick="openModal('especialidad', ${e.id})">✏️</button>
+                            <button class="btn-action delete" onclick="deleteEspecialidad(${e.id})">🗑️</button>
+                        </td>
+                    </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar especialidades: ' + err.message, 'error'));
+    }
+
+    function deleteEspecialidad(id) {
+        if (!confirm('¿Eliminar esta especialidad?')) return;
+        apiFetch('/especialidades/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Especialidad eliminada', 'success');
+            refreshEspecialidades();
+            // Si el modal de veterinario está abierto, recargar sus opciones
+            if (document.getElementById('modalOverlay').classList.contains('show')) {
+                const select = document.querySelector('#modalForm select[name="especialidadId"]');
+                if (select) cargarEspecialidadesEnSelect(select);
+            }
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- CITAS ----------
+    function renderCitas() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de citas</span>
+                            <button class="btn-primary" onclick="openModal('cita', null)">+ Nueva Cita</button>
+                        </div>
+                        <div id="citasTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshCitas();
+    }
+
+    function refreshCitas() {
+        apiFetch('/citas').then(data => {
+            const container = document.getElementById('citasTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay citas registradas.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Fecha/Hora</th><th>Motivo</th><th>Estado</th><th>Mascota</th><th>Veterinario</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(c => {
+                html += `<tr>
+                                <td>${c.id}</td>
+                                <td>${new Date(c.fechaHora).toLocaleString()}</td>
+                                <td>${c.motivo || '-'}</td>
+                                <td><span style="font-weight:600;color:${estadoColor(c.estado)}">${c.estado}</span></td>
+                                <td>${c.mascotaNombre || 'ID: '+c.mascotaId}</td>
+                                <td>${c.veterinarioNombre || 'ID: '+c.veterinarioId}</td>
+                                <td>
+                                    <button class="btn-action edit" onclick="openModal('cita', ${c.id})">✏️</button>
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteCita(${c.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar citas: ' + err.message, 'error'));
+    }
+
+    function estadoColor(estado) {
+        const map = { 'PENDIENTE': '#f39c12', 'CONFIRMADA': '#3498db', 'COMPLETADA': '#27ae60', 'CANCELADA': '#e74c3c' };
+        return map[estado] || '#333';
+    }
+
+    function deleteCita(id) {
+        if (!confirm('¿Eliminar esta cita?')) return;
+        apiFetch('/citas/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Cita eliminada', 'success');
+            refreshCitas();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- TRATAMIENTOS ----------
+    function renderTratamientos() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de tratamientos</span>
+                            ${canManageTratamientos() ? `<button class="btn-primary" onclick="openModal('tratamiento', null)">+ Nuevo Tratamiento</button>` : ''}
+                        </div>
+                        <div id="tratamientosTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshTratamientos();
+    }
+
+    function refreshTratamientos() {
+        apiFetch('/tratamientos').then(data => {
+            const container = document.getElementById('tratamientosTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay tratamientos registrados.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Descripción</th><th>Inicio</th><th>Fin</th><th>Costo</th><th>Mascota</th><th>Veterinario</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(t => {
+                html += `<tr>
+                                <td>${t.id}</td>
+                                <td>${t.descripcion || '-'}</td>
+                                <td>${t.fechaInicio || '-'}</td>
+                                <td>${t.fechaFin || '-'}</td>
+                                <td>${t.costo ? '$' + t.costo : '-'}</td>
+                                <td>${t.mascotaNombre || 'ID: '+t.mascotaId}</td>
+                                <td>${t.veterinarioNombre || 'ID: '+t.veterinarioId}</td>
+                                <td>
+                                    ${canManageTratamientos() ? `<button class="btn-action edit" onclick="openModal('tratamiento', ${t.id})">✏️</button>` : ''}
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteTratamiento(${t.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar tratamientos: ' + err.message, 'error'));
+    }
+
+    function deleteTratamiento(id) {
+        if (!confirm('¿Eliminar este tratamiento?')) return;
+        apiFetch('/tratamientos/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Tratamiento eliminado', 'success');
+            refreshTratamientos();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- MEDICAMENTOS ----------
+    function renderMedicamentos() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de medicamentos</span>
+                            ${canManageMedicamentos() ? `<button class="btn-primary" onclick="openModal('medicamento', null)">+ Nuevo Medicamento</button>` : ''}
+                        </div>
+                        <div id="medicamentosTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshMedicamentos();
+    }
+
+    function refreshMedicamentos() {
+        apiFetch('/medicamentos').then(data => {
+            const container = document.getElementById('medicamentosTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay medicamentos registrados.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Nombre</th><th>Descripción</th><th>Stock</th><th>Precio</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(m => {
+                html += `<tr>
+                                <td>${m.id}</td>
+                                <td>${m.nombre}</td>
+                                <td>${m.descripcion || '-'}</td>
+                                <td>${m.stock}</td>
+                                <td>$${m.precioVenta}</td>
+                                <td>
+                                    ${canManageMedicamentos() ? `<button class="btn-action edit" onclick="openModal('medicamento', ${m.id})">✏️</button>` : ''}
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteMedicamento(${m.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar medicamentos: ' + err.message, 'error'));
+    }
+
+    function deleteMedicamento(id) {
+        if (!confirm('¿Eliminar este medicamento?')) return;
+        apiFetch('/medicamentos/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Medicamento eliminado', 'success');
+            refreshMedicamentos();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- FACTURAS ----------
+    function renderFacturas() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Listado de facturas</span>
+                            ${canManageFacturas() ? `<button class="btn-primary" onclick="openModal('factura', null)">+ Nueva Factura</button>` : ''}
+                        </div>
+                        <div id="facturasTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshFacturas();
+    }
+
+    function refreshFacturas() {
+        apiFetch('/facturas').then(data => {
+            const container = document.getElementById('facturasTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay facturas registradas.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>N° Factura</th><th>Fecha</th><th>Subtotal</th><th>Impuesto</th><th>Total</th><th>Cliente</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(f => {
+                html += `<tr>
+                                <td>${f.id}</td>
+                                <td>${f.numeroFactura}</td>
+                                <td>${new Date(f.fechaEmision).toLocaleDateString()}</td>
+                                <td>$${f.subtotal}</td>
+                                <td>$${f.impuesto}</td>
+                                <td><strong>$${f.total}</strong></td>
+                                <td>${f.clienteNombre || 'ID: '+f.clienteId}</td>
+                                <td>
+                                    ${canDelete() ? `<button class="btn-action delete" onclick="deleteFactura(${f.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => showToast('Error al cargar facturas: ' + err.message, 'error'));
+    }
+
+    function deleteFactura(id) {
+        if (!confirm('¿Eliminar esta factura?')) return;
+        apiFetch('/facturas/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Factura eliminada', 'success');
+            refreshFacturas();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ---------- USUARIOS ----------
+    let usuariosData = [];
+
+    function renderUsuarios() {
+        const container = document.getElementById('pageContent');
+        container.innerHTML = `
+                    <div class="table-container">
+                        <div class="toolbar">
+                            <span>Gestión de Usuarios y Roles</span>
+                        </div>
+                        <div id="usuariosTable"><p class="empty-message">Cargando...</p></div>
+                    </div>
+                `;
+        refreshUsuarios();
+    }
+
+    function refreshUsuarios() {
+        apiFetch('/usuarios').then(data => {
+            usuariosData = data;
+            const container = document.getElementById('usuariosTable');
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p class="empty-message">No hay usuarios registrados.</p>`;
+                return;
+            }
+            let html = `<table>
+                            <thead><tr>
+                                <th>ID</th><th>Usuario</th><th>Email</th><th>Roles</th><th>Acciones</th>
+                            </tr></thead><tbody>`;
+            data.forEach(u => {
+                const rolesHtml = u.roles ? u.roles.map(r =>
+                    `<span class="role-badge-sm ${r.toLowerCase()}">${r}</span>`
+                ).join('') : 'Sin roles';
+                html += `<tr>
+                                <td>${u.id}</td>
+                                <td>${u.username}</td>
+                                <td>${u.email}</td>
+                                <td>${rolesHtml}</td>
+                                <td>
+                                    <button class="btn-action edit" onclick="openRolesModal(${u.id})">👑 Roles</button>
+                                    ${u.username !== 'admin' ? `<button class="btn-action delete" onclick="deleteUsuario(${u.id})">🗑️</button>` : ''}
+                                </td>
+                            </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }).catch(err => {
+            document.getElementById('usuariosTable').innerHTML =
+                `<p class="empty-message">❌ Error al cargar usuarios: ${err.message}</p>`;
+        });
+    }
+
+    function deleteUsuario(id) {
+        if (!confirm('¿Eliminar este usuario?')) return;
+        apiFetch('/usuarios/' + id, { method: 'DELETE' }).then(() => {
+            showToast('Usuario eliminado', 'success');
+            refreshUsuarios();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    // ==========================================
+    // MODAL PARA ROLES
+    // ==========================================
+    let currentUserId = null;
+
+    function openRolesModal(userId) {
+        currentUserId = userId;
+        const user = usuariosData.find(u => u.id === userId);
+        if (!user) return;
+
+        document.getElementById('rolesModalUsername').textContent = user.username;
+        const checkboxes = document.querySelectorAll('#rolesCheckboxes input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = user.roles && user.roles.includes(cb.value);
+        });
+
+        document.getElementById('rolesModalOverlay').classList.add('show');
+    }
+
+    function closeRolesModal() {
+        document.getElementById('rolesModalOverlay').classList.remove('show');
+        currentUserId = null;
+    }
+
+    document.getElementById('rolesModalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!currentUserId) return;
+
+        const checkboxes = document.querySelectorAll('#rolesCheckboxes input[type="checkbox"]:checked');
+        const roles = Array.from(checkboxes).map(cb => cb.value);
+
+        apiFetch('/usuarios/' + currentUserId + '/roles', {
+            method: 'PUT',
+            body: JSON.stringify({ roles: roles })
+        }).then(() => {
+            closeRolesModal();
+            showToast('Roles actualizados correctamente', 'success');
+            refreshUsuarios();
+            if (currentUser.username === document.getElementById('rolesModalUsername').textContent) {
+                currentUser.roles = roles;
+                document.getElementById('userRole').textContent = roles.join(', ');
+                buildMenu();
+            }
+        }).catch(err => {
+            showToast('Error al actualizar roles: ' + err.message, 'error');
+        });
+    });
+
+    document.getElementById('rolesModalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeRolesModal();
+    });
+
+    // ==========================================
+    // MODAL GENÉRICO (CRUD) - CON SOPORTE PARA ESPECIALIDADES
+    // ==========================================
+
+    const formConfigs = {
+        cliente: {
+            title: (id) => id ? 'Editar Cliente' : 'Nuevo Cliente',
+            fields: [
+                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                { name: 'apellido', label: 'Apellido', type: 'text', required: true },
+                { name: 'email', label: 'Email', type: 'email', required: true },
+                { name: 'telefono', label: 'Teléfono', type: 'text', required: false },
+                { name: 'direccion', label: 'Dirección', type: 'text', required: false }
+            ],
+            endpoint: '/clientes'
+        },
+        mascota: {
+            title: (id) => id ? 'Editar Mascota' : 'Nueva Mascota',
+            fields: [
+                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                { name: 'especie', label: 'Especie', type: 'text', required: true, placeholder: 'Perro, Gato, Ave...' },
+                { name: 'raza', label: 'Raza', type: 'text', required: false },
+                { name: 'fechaNacimiento', label: 'Fecha Nac.', type: 'date', required: false },
+                { name: 'clienteId', label: 'Cliente (ID)', type: 'number', required: true, placeholder: 'ID del cliente' }
+            ],
+            endpoint: '/mascotas'
+        },
+        veterinario: {
+            title: (id) => id ? 'Editar Veterinario' : 'Nuevo Veterinario',
+            fields: [
+                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                { name: 'apellido', label: 'Apellido', type: 'text', required: true },
+                { name: 'email', label: 'Email', type: 'email', required: true },
+                { name: 'telefono', label: 'Teléfono', type: 'text', required: false },
+                {
+                    name: 'especialidadId',
+                    label: 'Especialidad',
+                    type: 'select',
+                    required: false,
+                    options: [] // Se llenará dinámicamente
+                }
+            ],
+            endpoint: '/veterinarios'
+        },
+        especialidad: {
+            title: (id) => id ? 'Editar Especialidad' : 'Nueva Especialidad',
+            fields: [
+                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                { name: 'descripcion', label: 'Descripción', type: 'text', required: false }
+            ],
+            endpoint: '/especialidades'
+        },
+        cita: {
+            title: (id) => id ? 'Editar Cita' : 'Nueva Cita',
+            fields: [
+                { name: 'fechaHora', label: 'Fecha y Hora', type: 'datetime-local', required: true },
+                { name: 'motivo', label: 'Motivo', type: 'text', required: false },
+                { name: 'estado', label: 'Estado', type: 'select', required: true,
+                    options: ['PENDIENTE', 'CONFIRMADA', 'CANCELADA', 'COMPLETADA'] },
+                { name: 'mascotaId', label: 'Mascota (ID)', type: 'number', required: true, placeholder: 'ID de mascota' },
+                { name: 'veterinarioId', label: 'Veterinario (ID)', type: 'number', required: true, placeholder: 'ID de veterinario' }
+            ],
+            endpoint: '/citas'
+        },
+        tratamiento: {
+            title: (id) => id ? 'Editar Tratamiento' : 'Nuevo Tratamiento',
+            fields: [
+                { name: 'descripcion', label: 'Descripción', type: 'textarea', required: false },
+                { name: 'fechaInicio', label: 'Fecha Inicio', type: 'date', required: true },
+                { name: 'fechaFin', label: 'Fecha Fin', type: 'date', required: false },
+                { name: 'costo', label: 'Costo', type: 'number', required: false, step: '0.01' },
+                { name: 'mascotaId', label: 'Mascota (ID)', type: 'number', required: true, placeholder: 'ID de mascota' },
+                { name: 'veterinarioId', label: 'Veterinario (ID)', type: 'number', required: true, placeholder: 'ID de veterinario' }
+            ],
+            endpoint: '/tratamientos'
+        },
+        medicamento: {
+            title: (id) => id ? 'Editar Medicamento' : 'Nuevo Medicamento',
+            fields: [
+                { name: 'nombre', label: 'Nombre', type: 'text', required: true },
+                { name: 'descripcion', label: 'Descripción', type: 'text', required: false },
+                { name: 'stock', label: 'Stock', type: 'number', required: true, min: 0 },
+                { name: 'precioVenta', label: 'Precio Venta', type: 'number', required: true, step: '0.01', min: 0.01 }
+            ],
+            endpoint: '/medicamentos'
+        },
+        factura: {
+            title: (id) => id ? 'Editar Factura' : 'Nueva Factura',
+            fields: [
+                { name: 'numeroFactura', label: 'N° Factura', type: 'text', required: true },
+                { name: 'fechaEmision', label: 'Fecha Emisión', type: 'datetime-local', required: true },
+                { name: 'subtotal', label: 'Subtotal', type: 'number', required: true, step: '0.01', min: 0 },
+                { name: 'impuesto', label: 'Impuesto', type: 'number', required: true, step: '0.01', min: 0 },
+                { name: 'total', label: 'Total', type: 'number', required: true, step: '0.01', min: 0.01 },
+                { name: 'clienteId', label: 'Cliente (ID)', type: 'number', required: true, placeholder: 'ID del cliente' }
+            ],
+            endpoint: '/facturas'
+        }
+    };
+
+    let currentModalType = null;
+    let currentModalId = null;
+
+    // Función para cargar especialidades en un selector
+    function cargarEspecialidadesEnSelect(selectElement) {
+        apiFetch('/especialidades').then(especialidades => {
+            const currentValue = selectElement.value;
+            selectElement.innerHTML = '<option value="">Sin especialidad</option>' +
+                especialidades.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('');
+            // Restaurar valor si existía
+            if (currentValue) selectElement.value = currentValue;
+        }).catch(() => {});
+    }
+
+    function openModal(type, id) {
+        currentModalType = type;
+        currentModalId = id;
+
+        const config = formConfigs[type];
+        if (!config) { showToast('Error: tipo de formulario no soportado', 'error'); return; }
+
+        document.getElementById('modalTitle').textContent = config.title(id);
+
+        const fieldsContainer = document.getElementById('modalFields');
+        let html = '';
+
+        config.fields.forEach(f => {
+            let input = '';
+            if (f.type === 'select') {
+                // Para especialidadId, añadir botón "+" y wrapper
+                if (f.name === 'especialidadId') {
+                    input = `<div class="select-with-add">
+                                    <select name="${f.name}" ${f.required ? 'required' : ''}>
+                                        <option value="">Sin especialidad</option>
+                                    </select>
+                                    <button type="button" class="inline-add-btn" onclick="crearEspecialidadDesdeModal()">➕</button>
+                                </div>`;
+                } else {
+                    input = `<select name="${f.name}" ${f.required ? 'required' : ''}>
+                                    ${f.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                </select>`;
+                }
+            } else if (f.type === 'textarea') {
+                input = `<textarea name="${f.name}" ${f.required ? 'required' : ''}></textarea>`;
+            } else {
+                input = `<input type="${f.type}" name="${f.name}" ${f.required ? 'required' : ''}
+                                ${f.placeholder ? 'placeholder="'+f.placeholder+'"' : ''}
+                                ${f.step ? 'step="'+f.step+'"' : ''}
+                                ${f.min !== undefined ? 'min="'+f.min+'"' : ''}>`;
+            }
+            html += `<label>${f.label}</label>${input}`;
+        });
+
+        fieldsContainer.innerHTML = html;
+
+        // Si es veterinario, cargar especialidades en el select
+        if (type === 'veterinario') {
+            const select = document.querySelector('#modalForm select[name="especialidadId"]');
+            if (select) {
+                cargarEspecialidadesEnSelect(select);
+            }
+        }
+
+        // Si estamos editando, cargar datos
+        if (id) {
+            apiFetch(config.endpoint + '/' + id).then(data => {
+                const form = document.getElementById('modalForm');
+                for (const key in data) {
+                    const input = form.querySelector(`[name="${key}"]`);
+                    if (input) {
+                        if (input.type === 'datetime-local' && data[key]) {
+                            input.value = data[key].slice(0, 16);
+                        } else if (input.type === 'date' && data[key]) {
+                            input.value = data[key];
+                        } else {
+                            input.value = data[key] ?? '';
+                        }
+                    }
+                }
+            }).catch(err => showToast('Error al cargar datos: ' + err.message, 'error'));
+        }
+
+        document.getElementById('modalOverlay').classList.add('show');
+    }
+
+    // Función para crear especialidad desde el modal de veterinario
+    function crearEspecialidadDesdeModal() {
+        const nombre = prompt('Ingrese el nombre de la nueva especialidad:');
+        if (!nombre) return;
+        apiFetch('/especialidades', {
+            method: 'POST',
+            body: JSON.stringify({ nombre })
+        }).then(() => {
+            showToast('Especialidad creada', 'success');
+            // Recargar el selector
+            const select = document.querySelector('#modalForm select[name="especialidadId"]');
+            if (select) cargarEspecialidadesEnSelect(select);
+            // Si la vista de especialidades está abierta, refrescarla
+            if (currentView === 'especialidades') refreshEspecialidades();
+        }).catch(err => showToast('Error: ' + err.message, 'error'));
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('show');
+        document.getElementById('modalForm').reset();
+        currentModalType = null;
+        currentModalId = null;
+    }
+
+    document.getElementById('modalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const config = formConfigs[currentModalType];
+        if (!config) return;
+
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            // Si es number, convertir
+            if (key === 'clienteId' || key === 'mascotaId' || key === 'veterinarioId' ||
+                key === 'especialidadId' || key === 'stock' || key === 'costo' ||
+                key === 'subtotal' || key === 'impuesto' || key === 'total') {
+                data[key] = parseFloat(value) || 0;
+            } else {
+                data[key] = value;
+            }
+        });
+
+        const method = currentModalId ? 'PUT' : 'POST';
+        const url = currentModalId ? config.endpoint + '/' + currentModalId : config.endpoint;
+
+        apiFetch(url, {
+            method: method,
+            body: JSON.stringify(data)
+        }).then(res => {
+            closeModal();
+            showToast(currentModalId ? 'Actualizado correctamente' : 'Creado correctamente', 'success');
+            refreshCurrentView();
+            // Si se creó/actualizó una especialidad, refrescar la vista de especialidades si está abierta
+            if (currentModalType === 'especialidad' && currentView !== 'especialidades') {
+                // Si estamos en veterinarios, recargar el selector si está abierto
+            }
+        }).catch(err => {
+            showToast('Error: ' + err.message, 'error');
+        });
+    });
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
+
+    function refreshCurrentView() {
+        const map = {
+            clientes: refreshClientes,
+            mascotas: refreshMascotas,
+            veterinarios: refreshVeterinarios,
+            especialidades: refreshEspecialidades,
+            citas: refreshCitas,
+            tratamientos: refreshTratamientos,
+            medicamentos: refreshMedicamentos,
+            facturas: refreshFacturas,
+            usuarios: refreshUsuarios
+        };
+        if (map[currentView]) map[currentView]();
+    }
+
+    // ==========================================
+    // PERMISOS (roles)
+    // ==========================================
+    function hasRole(role) {
+        return (currentUser.roles || []).includes(role);
+    }
+
+    function canDelete() {
+        return hasRole('ADMIN');
+    }
+
+    function canManageVeterinarios() {
+        return hasRole('ADMIN');
+    }
+
+    function canManageTratamientos() {
+        return hasRole('ADMIN') || hasRole('VETERINARIO');
+    }
+
+    function canManageMedicamentos() {
+        return hasRole('ADMIN');
+    }
+
+    function canManageFacturas() {
+        return hasRole('ADMIN') || hasRole('RECEPCIONISTA');
+    }
+
+    // ==========================================
+    // LOGOUT
+    // ==========================================
+    function doLogout() {
+        localStorage.removeItem('vetcare_token');
+        localStorage.removeItem('vetcare_user');
+        currentToken = null;
+        currentUser = null;
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('authContainer').style.display = 'flex';
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('authMessage').className = 'message';
+        document.getElementById('authMessage').textContent = '';
+        showToast('Sesión cerrada', 'info');
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN
+    // ==========================================
+    window.onload = function() {
+        const token = localStorage.getItem('vetcare_token');
+        const user = JSON.parse(localStorage.getItem('vetcare_user'));
+        if (token && user) {
+            currentToken = token;
+            currentUser = user;
+            enterApp();
+        } else {
+            document.getElementById('authContainer').style.display = 'flex';
+        }
+    };
+
+    console.log('🐾 VetCare Frontend cargado correctamente.');
+    console.log('Roles disponibles: ADMIN, VETERINARIO, RECEPCIONISTA');
+</script>
+</body>
+</html>
